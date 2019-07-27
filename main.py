@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QApplication, QDialog
+from PyQt5.QtWidgets import QWidget, QApplication, QDialog, QTableWidgetItem
 from PyQt5.uic import loadUi
 
 
@@ -13,36 +13,47 @@ class WelcomePage(QWidget):
         self.register_button.clicked.connect(self.register_clicked)
 
     def login_clicked(self):
-        print(self.sender())
-        self.login_page = LoginRegisterPage(self.sender())
+        self.login_page = LoginPage(self)
         self.login_page.show()
 
     def register_clicked(self):
-        print(self.sender())
-        self.register_page = LoginRegisterPage(self.sender())
+        self.register_page = RegisterPage()
         self.register_page.show()
 
 
-class LoginRegisterPage(QWidget):
+class LoginPage(QWidget):
 
-    def __init__(self, sender):
+    def __init__(self, welcome_page):
         super().__init__()
         loadUi('./ui/login_reg_page.ui', self)
 
-        if sender.text() == 'Register':
-            self.header_label.setText('Register')
-            self.login_reg_button.setText('Register')
-            self.login_reg_button.clicked.connect(self.register_clicked)
-        else:
-            self.login_reg_button.clicked.connect(self.login_clicked)
-
+        self.welcome_page = welcome_page
+        self.login_reg_button.clicked.connect(self.login_clicked)
         self.cancel_button.clicked.connect(self.close)
 
     def login_clicked(self):
         self.username = self.username_txt.text()
         self.password = self.password_txt.text()
 
-        print('Username: %s Password: %s' % (self.username, self.password))
+        if self.username == 'Apostolis' and self.password == 'pass':
+            self.account_page = AccountsPage(self.username)
+            self.account_page.show()
+            self.welcome_page.close()
+            self.close()
+        else:
+            print('Wrong credentials')
+
+
+class RegisterPage(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        loadUi('./ui/login_reg_page.ui', self)
+
+        self.header_label.setText('Register')
+        self.login_reg_button.setText('Register')
+        self.login_reg_button.clicked.connect(self.register_clicked)
+        self.cancel_button.clicked.connect(self.close)
 
     def register_clicked(self):
         self.username = self.username_txt.text()
@@ -51,24 +62,25 @@ class LoginRegisterPage(QWidget):
         print('Username: %s Password: %s' % (self.username, self.password))
 
 
-class RegisterPage(QWidget):
+class AccountsPage(QWidget):
 
-    def __init__(self):
+    def __init__(self, username):
         super().__init__()
+        loadUi('./ui/passwords.ui', self)
 
+        self.fill_table()
+        self.username_label.setText(
+            'Hello %s, your passwords are:' % (username))
 
-class Page(QWidget):
+    def fill_table(self):
+        accounts = {'id': 1, 'Account': 'Fb',
+                    'email': 'me', 'password': 'password'}
 
-    def __init__(self):
-        super().__init__()
-        loadUi('./ui/page.ui', self)
-
-        self.back_button.clicked.connect(self.back)
-
-    def back(self):
-        self.login_page = LoginPage()
-        self.close()
-        self.login_page.show()
+        self.table.setRowCount(1)
+        self.table.setItem(0, 0, QTableWidgetItem(str(accounts['id'])))
+        self.table.setItem(0, 1, QTableWidgetItem(accounts['Account']))
+        self.table.setItem(0, 2, QTableWidgetItem(accounts['email']))
+        self.table.setItem(0, 3, QTableWidgetItem(accounts['password']))
 
 
 def main(argv):
