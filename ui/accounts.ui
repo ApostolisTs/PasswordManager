@@ -86,8 +86,17 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
      <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectItems</enum>
+      <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <property name="showGrid">
       <bool>true</bool>
@@ -95,6 +104,9 @@
      <property name="gridStyle">
       <enum>Qt::SolidLine</enum>
      </property>
+     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+      <bool>false</bool>
+     </attribute>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
@@ -110,17 +122,17 @@
      </column>
      <column>
       <property name="text">
+       <string>Username</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Email</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Password</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string/>
       </property>
      </column>
     </widget>
