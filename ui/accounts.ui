@@ -112,7 +112,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>No.</string>
+       <string>ID</string>
       </property>
      </column>
      <column>

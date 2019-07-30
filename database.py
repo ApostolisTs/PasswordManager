@@ -18,8 +18,9 @@ class Database(object):
     def delete_user(self):
         pass
 
-    def select_user(self):
-        self.__cursor.execute("""SELECT * FROM users;""")
+    def select_from_users(self, username):
+        self.__cursor.execute("""SELECT * FROM users WHERE username = :username;""",
+                              {'username': username})
         return self.__cursor.fetchall()
 
     def insert_account(self, account, username, email, password, user):
@@ -34,6 +35,7 @@ class Database(object):
     def delete_account(self):
         pass
 
-    def select_account(self):
-        self.__cursor.execute("""SELECT * FROM accounts;""")
+    def select_from_accounts(self, user):
+        self.__cursor.execute("""SELECT * FROM accounts WHERE user = :user;""",
+                              {'user': user})
         return self.__cursor.fetchall()
