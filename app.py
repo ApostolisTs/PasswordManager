@@ -4,8 +4,7 @@ from PyQt5.QtWidgets import (QWidget, QApplication, QDialog,
 from PyQt5.uic import loadUi
 from database import Database
 
-# db = Database()
-# db.connect()
+db = Database()
 
 
 class WelcomePage(QWidget):
@@ -41,8 +40,9 @@ class LoginPage(QWidget):
         self.password = self.password_txt.text()
 
         if self.username == 'Apostolis' and self.password == 'pass':
-            # testing database.
+            # TESTING DATABASE.
             # db.insert_user(self.username, self.password)
+
             self.account_page = AccountsPage(self.username)
             self.account_page.show()
             self.welcome_page.close()
@@ -116,6 +116,8 @@ class AccountsPage(QWidget):
             self.table.setItem(i, 4, QTableWidgetItem(account['password']))
 
     def add_clicked(self):
+        # db.insert_account('facebook', 'testing', 'database',
+        #                   'insert into', 'accounts table')
         pass
 
     def delete_clicked(self):
