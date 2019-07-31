@@ -12,7 +12,6 @@ class WelcomePage(QWidget):
 
     def __init__(self):
         super().__init__()
-
         loadUi('./ui/welcome_page.ui', self)
         self.login_button.clicked.connect(self.login_clicked)
         self.register_button.clicked.connect(self.register_clicked)
@@ -30,20 +29,21 @@ class LoginPage(QWidget):
 
     def __init__(self, welcome_page):
         super().__init__()
-
         loadUi('./ui/login_register_page.ui', self)
         self.welcome_page = welcome_page
+
+        # Map button clicks to methods.
         self.login_reg_button.clicked.connect(self.login_clicked)
         self.cancel_button.clicked.connect(self.close)
 
     def login_clicked(self):
-        self.username = self.username_txt.text()
-        self.password = self.password_txt.text()
+        username = self.username_txt.text()
+        password = self.password_txt.text()
 
-        credentials = db.select_from_users(self.username)
+        credentials = db.select_from_users(username)
 
-        if credentials and (credentials[0][1] == self.password):
-            self.account_page = AccountsPage(self.username)
+        if credentials and (credentials[1] == password):
+            self.account_page = AccountsPage(credentials[0])
             self.account_page.show()
             self.welcome_page.close()
             self.close()
@@ -54,7 +54,7 @@ class LoginPage(QWidget):
         popup = QMessageBox()
         popup.setWindowTitle('Information')
         popup.setIcon(QMessageBox.Information)
-        popup.setText('Wrong username!')
+        popup.setText('Wrong password or username!')
         popup.exec_()
 
 
@@ -62,10 +62,11 @@ class RegisterPage(QWidget):
 
     def __init__(self):
         super().__init__()
-
         loadUi('./ui/login_register_page.ui', self)
         self.header_label.setText('Register')
         self.login_reg_button.setText('Register')
+
+        # Map button clicks to methods.
         self.login_reg_button.clicked.connect(self.register_clicked)
         self.cancel_button.clicked.connect(self.close)
 
@@ -100,8 +101,8 @@ class AccountsPage(QWidget):
     def __init__(self, user):
         super().__init__()
         self.user = user
-
         loadUi('./ui/accounts.ui', self)  # Load the ui file.
+        self.set_ui_elements()
 
         # Customize its column's resize mode seperately.
         header = self.table.horizontalHeader()
@@ -111,17 +112,17 @@ class AccountsPage(QWidget):
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.Stretch)
 
-        self.populate_table()
-        self.username_label.setText(
-            'Hello %s, your passwords are:' % (self.user))
-
-        # Map buttons to functions.
+        # Map button clicks to methods.
         self.add_button.clicked.connect(self.add_account_clicked)
         self.delete_button.clicked.connect(self.delete_account_clicked)
         self.modify_button.clicked.connect(self.modify_account_clicked)
+        self.user_settings_button.clicked.connect(self.user_settings_clicked)
         self.logout_button.clicked.connect(self.logout_clicked)
 
     def populate_table(self):
+        """ Populates the table with the accounts of the logged in user that
+        are stored in the database. """
+
         accounts = db.select_from_accounts(self.user)
 
         self.table.setRowCount(len(accounts))
@@ -135,10 +136,16 @@ class AccountsPage(QWidget):
             self.table.setItem(i, 3, QTableWidgetItem(account[3]))
             self.table.setItem(i, 4, QTableWidgetItem(account[4]))
 
+    def set_ui_elements(self):
+        """ Initializes the ui elements that are set dynamically. """
+
+        self.username_label.setText(
+            'Hello %s, your passwords are:' % (self.user))
+        self.populate_table()
+
     def add_account_clicked(self):
-        # db.insert_account('facebook', 'testing', 'database',
-        #                   'insert into', 'accounts table')
-        pass
+        self.add_accounts_page = AddAccountPage()
+        self.add_accounts_page.show()
 
     def delete_account_clicked(self):
         pass
@@ -146,8 +153,52 @@ class AccountsPage(QWidget):
     def modify_account_clicked(self):
         pass
 
+    def user_settings_clicked(self):
+        self.user_settings_page = UserSettingsPage(self)
+        self.user_settings_page.show()
+
     def logout_clicked(self):
         self.close()
+
+
+class UserSettingsPage(QWidget):
+
+    def __init__(self, accounts_page):
+        super().__init__()
+        self.accounts_page = accounts_page
+        loadUi('./ui/user_settings.ui', self)
+        credentials = db.select_from_users(self.accounts_page.user)
+        self.username_txt.setText(credentials[0])
+        self.password_txt.setText(credentials[1])
+
+        # Map button clicks to methods.
+        self.save_button.clicked.connect(self.save_clicked)
+        self.cancel_button.clicked.connect(self.close)
+
+    def save_clicked(self):
+        """ Saves the new username and new password in the database and refreshes
+        the accounts page. """
+
+        new_username = self.username_txt.text()
+        new_password = self.password_txt.text()
+        db.update_user(self.accounts_page.user, new_username, new_password)
+        self.accounts_page.user = new_username
+        self.accounts_page.set_ui_elements()
+        self.close()
+
+
+class AddAccountPage(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        loadUi('./ui/add_account_page.ui', self)
+
+        # Map button clicks to methods.
+        self.cancel_button.clicked.connect(self.close)
+        self.add_account_button.clicked.connect(self.add_account_clicked)
+
+    def add_account_clicked(self):
+        pass
 
 
 def main(argv):
