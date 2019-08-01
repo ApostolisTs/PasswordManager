@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>login_form</class>
  <widget class="QWidget" name="login_form">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -31,7 +34,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Password Keeper</string>
+   <string>Password Manager</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>

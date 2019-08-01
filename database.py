@@ -14,14 +14,14 @@ class Database(object):
 
     def update_user(self, old_username, new_username, new_password):
         self.__cursor.execute("""UPDATE users SET username = :new_username, password = :password
-                                WHERE username = :old_username""",
+                                WHERE username = :old_username;""",
                               {'new_username': new_username, 'password': new_password, 'old_username': old_username})
         self.__conn.commit()
 
     def delete_user(self):
         pass
 
-    def select_from_users(self, username):
+    def select_user(self, username):
         self.__cursor.execute("""SELECT * FROM users WHERE username = :username;""",
                               {'username': username})
         return self.__cursor.fetchone()
@@ -35,10 +35,21 @@ class Database(object):
     def update_account(self):
         pass
 
-    def delete_account(self):
-        pass
+    def update_user_field_in_accounts(self, new_username, old_username):
+        self.__cursor.execute("""UPDATE accounts SET user = :new_username
+                                WHERE user = :old_username;""",
+                              {'new_username': new_username, 'old_username': old_username})
+        self.__conn.commit()
 
-    def select_from_accounts(self, user):
-        self.__cursor.execute("""SELECT * FROM accounts WHERE user = :user;""",
+    def delete_account_by_id(self, id):
+        self.__cursor.execute("""DELETE FROM accounts WHERE id= :id; """,
+                              {'id': id})
+        self.__conn.commit()
+
+    def select_accounts_by_user(self, user):
+        self.__cursor.execute("""SELECT * FROM accounts WHERE user= :user;""",
                               {'user': user})
         return self.__cursor.fetchall()
+
+    def close(self):
+        self.__conn.close()

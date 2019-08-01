@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>300</height>
+    <width>550</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +21,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>500</width>
-    <height>300</height>
+    <width>550</width>
+    <height>320</height>
    </size>
   </property>
   <property name="font">
@@ -29,7 +32,13 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Password Keeper</string>
+   <string>Password Manager</string>
+  </property>
+  <property name="toolTip">
+   <string>Account</string>
+  </property>
+  <property name="statusTip">
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -166,7 +175,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="bottomMargin">
-      <number>10</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QPushButton" name="cancel_button">
@@ -214,6 +223,25 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_6">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>The Account, Username and Password fields are required.</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

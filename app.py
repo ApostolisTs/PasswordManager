@@ -40,10 +40,10 @@ class LoginPage(QWidget):
         username = self.username_txt.text()
         password = self.password_txt.text()
 
-        credentials = db.select_from_users(username)
+        credentials = db.select_user(username)
 
         if credentials and (credentials[1] == password):
-            self.account_page = AccountsPage(credentials[0])
+            self.account_page = AccountsPage(list(credentials))
             self.account_page.show()
             self.welcome_page.close()
             self.close()
@@ -71,26 +71,28 @@ class RegisterPage(QWidget):
         self.cancel_button.clicked.connect(self.close)
 
     def register_clicked(self):
-        self.username = self.username_txt.text()
-        self.password = self.password_txt.text()
+        username = self.username_txt.text()
+        password = self.password_txt.text()
 
         try:
-            db.insert_user(self.username, self.password)
+            db.insert_user(username, password)
             self.show_info_message(success=True)
             self.close()
         except IntegrityError as e:
-            self.show_info_message(success=False)
+            self.show_popup_message(success=False)
 
-    def show_info_message(self, success):
+    def show_popup_message(self, success):
         """ Creates a information window that informs the user if their
         registration was successful or not. """
 
         popup = QMessageBox()
-        popup.setWindowTitle('Information')
-        popup.setIcon(QMessageBox.Information)
         if success:
+            popup.setWindowTitle('Information')
+            popup.setIcon(QMessageBox.Information)
             popup.setText('You registered successfully!')
         else:
+            popup.setWindowTitle('Error')
+            popup.setIcon(QMessageBox.Critical)
             popup.setText(
                 'This username is taken!\nPlease choose another username!')
         popup.exec_()
@@ -98,11 +100,12 @@ class RegisterPage(QWidget):
 
 class AccountsPage(QWidget):
 
-    def __init__(self, user):
+    def __init__(self, credentials):
         super().__init__()
-        self.user = user
+        self.credentials = credentials
         loadUi('./ui/accounts.ui', self)  # Load the ui file.
-        self.set_ui_elements()
+        self.set_username_label()
+        self.populate_table()
 
         # Customize its column's resize mode seperately.
         header = self.table.horizontalHeader()
@@ -123,8 +126,7 @@ class AccountsPage(QWidget):
         """ Populates the table with the accounts of the logged in user that
         are stored in the database. """
 
-        accounts = db.select_from_accounts(self.user)
-
+        accounts = db.select_accounts_by_user(self.credentials[0])
         self.table.setRowCount(len(accounts))
         for i, account in enumerate(accounts):
             self.table.setItem(i, 0, QTableWidgetItem(str(account[0])))
@@ -136,24 +138,45 @@ class AccountsPage(QWidget):
             self.table.setItem(i, 3, QTableWidgetItem(account[3]))
             self.table.setItem(i, 4, QTableWidgetItem(account[4]))
 
-    def set_ui_elements(self):
-        """ Initializes the ui elements that are set dynamically. """
-
+    def set_username_label(self):
+        """ Sets the username label on the top of the window. """
         self.username_label.setText(
-            'Hello %s, your passwords are:' % (self.user))
-        self.populate_table()
+            'Hello %s, your passwords are:' % (self.credentials[0]))
 
     def add_account_clicked(self):
-        self.add_accounts_page = AddAccountPage()
+        """ Shows the AddAccountPage for the user to add an account. """
+
+        self.add_accounts_page = AddAccountPage(self)
         self.add_accounts_page.show()
 
     def delete_account_clicked(self):
-        pass
+        """ Deletes an account from the database and the table in accounts page. """
+
+        selected_account = self.table.selectedItems()
+        if selected_account:
+            selected_account_id = selected_account[0].text()
+            self.table.removeRow(self.table.currentRow())
+            db.delete_account_by_id(selected_account_id)
+        else:
+            self.show_delete_error_message()
+
+    def show_delete_error_message(self):
+        """ Shows an error message if the user hasn't selected a row or an account
+        from the table when he pressed the Delete Account button. """
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Error')
+        popup.setIcon(QMessageBox.Critical)
+        popup.setText('Please select a row/account from the table to delete!')
+        popup.exec_()
 
     def modify_account_clicked(self):
+        # TODO.
         pass
 
     def user_settings_clicked(self):
+        """ Shows the UserSettingsPage for the user to edit their information. """
+
         self.user_settings_page = UserSettingsPage(self)
         self.user_settings_page.show()
 
@@ -167,9 +190,8 @@ class UserSettingsPage(QWidget):
         super().__init__()
         self.accounts_page = accounts_page
         loadUi('./ui/user_settings.ui', self)
-        credentials = db.select_from_users(self.accounts_page.user)
-        self.username_txt.setText(credentials[0])
-        self.password_txt.setText(credentials[1])
+        self.username_txt.setText(self.accounts_page.credentials[0])
+        self.password_txt.setText(self.accounts_page.credentials[1])
 
         # Map button clicks to methods.
         self.save_button.clicked.connect(self.save_clicked)
@@ -181,16 +203,33 @@ class UserSettingsPage(QWidget):
 
         new_username = self.username_txt.text()
         new_password = self.password_txt.text()
-        db.update_user(self.accounts_page.user, new_username, new_password)
-        self.accounts_page.user = new_username
-        self.accounts_page.set_ui_elements()
-        self.close()
+
+        if not (self.accounts_page.credentials[0] == new_username and self.accounts_page.credentials[1] == new_password):
+            try:
+                db.update_user(
+                    self.accounts_page.credentials[0], new_username, new_password)
+                db.update_user_field_in_accounts(
+                    new_username, self.accounts_page.credentials[0])
+                self.accounts_page.credentials[0] = new_username
+                self.accounts_page.set_username_label()
+                self.close()
+            except IntegrityError as e:
+                self.show_error_message()
+
+    def show_error_message(self):
+        popup = QMessageBox()
+        popup.setWindowTitle('Error')
+        popup.setIcon(QMessageBox.Critical)
+        popup.setText(
+            'This username is taken!\nPlease choose another username!')
+        popup.exec_()
 
 
 class AddAccountPage(QWidget):
 
-    def __init__(self):
+    def __init__(self, accounts_page):
         super().__init__()
+        self.accounts_page = accounts_page
         loadUi('./ui/add_account_page.ui', self)
 
         # Map button clicks to methods.
@@ -198,7 +237,30 @@ class AddAccountPage(QWidget):
         self.add_account_button.clicked.connect(self.add_account_clicked)
 
     def add_account_clicked(self):
-        pass
+        """ Adds an account to the database and refreshes the table in the
+        accounts page. """
+
+        account = self.account_txt.text()
+        username = self.username_txt.text() if self.username_txt.text() else None
+        email = self.email_txt.text()
+        password = self.password_txt.text()
+
+        if not (account and email and password):
+            self.show_error_message()
+        else:
+            db.insert_account(account, username, email,
+                              password, self.accounts_page.credentials[0])
+            self.accounts_page.populate_table()
+            self.close()
+
+    def show_error_message(self):
+        """ Shows an error message if the required fields are not filled. """
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Error')
+        popup.setIcon(QMessageBox.Critical)
+        popup.setText('Please fill all the required fields!')
+        popup.exec_()
 
 
 def main(argv):

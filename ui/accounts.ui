@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>500</height>
+    <width>1100</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -22,9 +22,19 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Password Keeper</string>
+   <string>Password Manager</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="Line" name="line_3">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -37,7 +47,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Password Keeper</string>
+        <string>Password Manager</string>
        </property>
       </widget>
      </item>
@@ -191,6 +201,9 @@
         <font>
          <pointsize>11</pointsize>
         </font>
+       </property>
+       <property name="statusTip">
+        <string/>
        </property>
        <property name="text">
         <string>Delete Account</string>

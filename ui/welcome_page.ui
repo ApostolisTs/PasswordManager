@@ -41,10 +41,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Password Keeper</string>
+   <string>Password Manager</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
@@ -59,7 +59,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Password Keeper</string>
+        <string>Password Manager</string>
        </property>
       </widget>
      </item>
@@ -102,7 +102,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="Line" name="line">
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
@@ -115,7 +115,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QLabel" name="label_2">
@@ -151,6 +151,16 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="0" column="0">
+    <widget class="Line" name="line_2">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

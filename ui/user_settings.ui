@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +26,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Password Keeper</string>
+   <string>Password Manager</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -81,7 +84,11 @@
       <widget class="QLineEdit" name="username_txt"/>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="password_txt"/>
+      <widget class="QLineEdit" name="password_txt">
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
