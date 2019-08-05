@@ -93,7 +93,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Account:</string>
+        <string>Account Type:</string>
        </property>
       </widget>
      </item>

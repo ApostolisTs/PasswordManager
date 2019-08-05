@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>widget</class>
+ <widget class="QWidget" name="widget">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>205</height>
+    <width>549</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>450</width>
-    <height>205</height>
+    <width>550</width>
+    <height>300</height>
    </size>
   </property>
   <property name="font">
@@ -30,7 +30,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="account_id_label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
       </font>
      </property>
      <property name="text">
-      <string>User Settings</string>
+      <string>Account ID:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -58,32 +58,72 @@
       <number>10</number>
      </property>
      <property name="verticalSpacing">
-      <number>20</number>
+      <number>10</number>
      </property>
      <property name="topMargin">
-      <number>20</number>
+      <number>10</number>
      </property>
      <property name="bottomMargin">
       <number>10</number>
      </property>
      <item row="0" column="0">
       <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string>Change your username:</string>
+        <string>Account Type:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string>Change your password:</string>
+        <string>Username:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Email:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Password:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="username_txt"/>
+      <widget class="QLineEdit" name="account_type_txt"/>
      </item>
      <item row="1" column="1">
+      <widget class="QLineEdit" name="username_txt"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="email_txt"/>
+     </item>
+     <item row="3" column="1">
       <widget class="QLineEdit" name="password_txt">
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
@@ -96,6 +136,11 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="cancel_button">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -103,12 +148,36 @@
      </item>
      <item>
       <widget class="QPushButton" name="save_button">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Save Changes</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>The Account, Username and Password fields are required.</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

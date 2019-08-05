@@ -1,11 +1,9 @@
 import sys
 from sqlite3 import IntegrityError
-from PyQt5.QtWidgets import (QWidget, QApplication, QDialog,
+from PyQt5.QtWidgets import (QWidget, QApplication, QDialog, QPushButton,
                              QTableWidgetItem, QHeaderView, QMessageBox)
 from PyQt5.uic import loadUi
 from database import Database
-
-db = Database()
 
 
 class WelcomePage(QWidget):
@@ -40,7 +38,7 @@ class LoginPage(QWidget):
         username = self.username_txt.text()
         password = self.password_txt.text()
 
-        credentials = db.select_user(username)
+        credentials = Database.select_user(username)
 
         if credentials and (credentials[1] == password):
             self.account_page = AccountsPage(list(credentials))
@@ -51,6 +49,8 @@ class LoginPage(QWidget):
             self.show_error_message()
 
     def show_error_message(self):
+        """ Shows an error message if the username or the password are incorrect. """
+
         popup = QMessageBox()
         popup.setWindowTitle('Information')
         popup.setIcon(QMessageBox.Information)
@@ -75,14 +75,14 @@ class RegisterPage(QWidget):
         password = self.password_txt.text()
 
         try:
-            db.insert_user(username, password)
+            Database.insert_user(username, password)
             self.show_info_message(success=True)
             self.close()
         except IntegrityError as e:
             self.show_popup_message(success=False)
 
     def show_popup_message(self, success):
-        """ Creates a information window that informs the user if their
+        """ Shows an information window that informs the user if their
         registration was successful or not. """
 
         popup = QMessageBox()
@@ -126,22 +126,47 @@ class AccountsPage(QWidget):
         """ Populates the table with the accounts of the logged in user that
         are stored in the database. """
 
-        accounts = db.select_accounts_by_user(self.credentials[0])
+        accounts = Database.select_accounts_by_user(self.credentials[0])
         self.table.setRowCount(len(accounts))
         for i, account in enumerate(accounts):
+            # Setting the account ID.
             self.table.setItem(i, 0, QTableWidgetItem(str(account[0])))
+
+            # Setting the account type.
             self.table.setItem(i, 1, QTableWidgetItem(account[1]))
+
             if account[2]:
+                # Setting a username if there is one.
                 self.table.setItem(i, 2, QTableWidgetItem(account[2]))
             else:
                 self.table.setItem(i, 2, QTableWidgetItem('No username'))
+
+            # Setting the account email.
             self.table.setItem(i, 3, QTableWidgetItem(account[3]))
-            self.table.setItem(i, 4, QTableWidgetItem(account[4]))
+
+            # Setting the account password to stars '*' so it won't be visible right away.
+            self.table.setItem(i, 4, QTableWidgetItem('**********'))
+
+            # Setting a button that when clicked shows the password to the user.
+            btn = QPushButton('Show Password')
+            self.table.setCellWidget(i, 5, btn)
+            btn.clicked.connect(self.show_password_clicked)
 
     def set_username_label(self):
         """ Sets the username label on the top of the window. """
         self.username_label.setText(
             'Hello %s, your passwords are:' % (self.credentials[0]))
+
+    def show_password_clicked(self):
+        """ Shows the ShowPasswordPage where the user can see a specific account password. """
+
+        row = self.table.currentRow()
+        account_id = self.table.item(row, 0).text()
+        account_type = self.table.item(row, 1).text()
+
+        self.show_password_page = ShowPasswordPage(
+            account_id, account_type, self.credentials)
+        self.show_password_page.show()
 
     def add_account_clicked(self):
         """ Shows the AddAccountPage for the user to add an account. """
@@ -156,23 +181,20 @@ class AccountsPage(QWidget):
         if selected_account:
             selected_account_id = selected_account[0].text()
             self.table.removeRow(self.table.currentRow())
-            db.delete_account_by_id(selected_account_id)
+            Database.delete_account_by_id(selected_account_id)
         else:
-            self.show_delete_error_message()
-
-    def show_delete_error_message(self):
-        """ Shows an error message if the user hasn't selected a row or an account
-        from the table when he pressed the Delete Account button. """
-
-        popup = QMessageBox()
-        popup.setWindowTitle('Error')
-        popup.setIcon(QMessageBox.Critical)
-        popup.setText('Please select a row/account from the table to delete!')
-        popup.exec_()
+            self.show_error_message()
 
     def modify_account_clicked(self):
-        # TODO.
-        pass
+        """ Shows the ModifyAccountPage for the user to edit their account information. """
+
+        selected_account = self.table.selectedItems()
+        if selected_account:
+            account_id = selected_account[0].text()
+            self.modify_account_page = ModifyAccountPage(self, account_id)
+            self.modify_account_page.show()
+        else:
+            self.show_error_message()
 
     def user_settings_clicked(self):
         """ Shows the UserSettingsPage for the user to edit their information. """
@@ -182,6 +204,16 @@ class AccountsPage(QWidget):
 
     def logout_clicked(self):
         self.close()
+
+    def show_error_message(self):
+        """ Shows an error message if the user hasn't selected a row or an account
+        from the table when he pressed the Delete or Modify Account button. """
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Error')
+        popup.setIcon(QMessageBox.Critical)
+        popup.setText('Please select a row/account from the table!')
+        popup.exec_()
 
 
 class UserSettingsPage(QWidget):
@@ -206,9 +238,9 @@ class UserSettingsPage(QWidget):
 
         if not (self.accounts_page.credentials[0] == new_username and self.accounts_page.credentials[1] == new_password):
             try:
-                db.update_user(
+                Database.update_user(
                     self.accounts_page.credentials[0], new_username, new_password)
-                db.update_user_field_in_accounts(
+                Database.update_user_field_in_accounts(
                     new_username, self.accounts_page.credentials[0])
                 self.accounts_page.credentials[0] = new_username
                 self.accounts_page.set_username_label()
@@ -240,16 +272,16 @@ class AddAccountPage(QWidget):
         """ Adds an account to the database and refreshes the table in the
         accounts page. """
 
-        account = self.account_txt.text()
+        account_type = self.account_txt.text()
         username = self.username_txt.text() if self.username_txt.text() else None
         email = self.email_txt.text()
         password = self.password_txt.text()
 
-        if not (account and email and password):
+        if not (account_type and email and password):
             self.show_error_message()
         else:
-            db.insert_account(account, username, email,
-                              password, self.accounts_page.credentials[0])
+            Database.insert_account(account_type, username, email,
+                                    password, self.accounts_page.credentials[0])
             self.accounts_page.populate_table()
             self.close()
 
@@ -261,6 +293,70 @@ class AddAccountPage(QWidget):
         popup.setIcon(QMessageBox.Critical)
         popup.setText('Please fill all the required fields!')
         popup.exec_()
+
+
+class ModifyAccountPage(QWidget):
+
+    def __init__(self, accounts_page, account_id):
+        super().__init__()
+        loadUi('./ui/modify_account_page.ui', self)
+        self.accounts_page = accounts_page
+        account_info = Database.select_account_by_id(account_id)
+        self.account_id_label.setText('Account ID-%s' % (account_id))
+        self.account_type_txt.setText(account_info[0])
+        self.username_txt.setText(account_info[1])
+        self.email_txt.setText(account_info[2])
+        self.password_txt.setText(account_info[3])
+
+        # Map button clicks to methods.
+        self.save_button.clicked.connect(lambda: self.save_clicked(account_id))
+        self.cancel_button.clicked.connect(self.close)
+
+    def save_clicked(self, account_id):
+        """ Saves the changes made to the selected account. """
+
+        account_type = self.account_type_txt.text()
+        username = self.username_txt.text()
+        email = self.email_txt.text()
+        password = self.password_txt.text()
+
+        if not (account_type and email and password):
+            self.show_error_message()
+        else:
+            Database.update_account_by_id(
+                account_id, account_type, username, email, password)
+            self.accounts_page.populate_table()
+            self.close()
+
+    def show_error_message(self):
+        """ Shows an error message if the required fields are not filled. """
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Error')
+        popup.setIcon(QMessageBox.Critical)
+        popup.setText('Please fill all the required fields!')
+        popup.exec_()
+
+
+class ShowPasswordPage(QWidget):
+
+    def __init__(self, account_id, account_type, credentials):
+        super().__init__()
+        loadUi('./ui/show_password_page.ui', self)
+
+        # Map button clicks to methods.
+        self.show_button.clicked.connect(
+            lambda: self.show_password(account_id, account_type, credentials))
+        self.cancel_button.clicked.connect(self.close)
+
+    def show_password(self, account_id, account_type, credentials):
+        password = self.password_txt.text()
+
+        if password == credentials[1]:
+            account_password = Database.select_account_password_by_id(
+                account_id)
+            self.password_label.setText(
+                'Your %s password is:\n %s' % (account_type, account_password[0]))
 
 
 def main(argv):
