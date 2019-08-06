@@ -72,8 +72,8 @@ class Database(object):
     def update_accounts_user_field(cls, new_username, old_username):
         """ Updates the user field in the accounts of the user that is logged in. """
 
-        cls.__cursor.execute("""UPDATE accounts SET user = : new_username
-                                    WHERE user =: old_username; """,
+        cls.__cursor.execute("""UPDATE accounts SET user = :new_username
+                                    WHERE user = :old_username; """,
                              {'new_username': new_username, 'old_username': old_username})
         cls.__conn.commit()
 
@@ -81,7 +81,7 @@ class Database(object):
     def delete_account_by_id(cls, id):
         """ Deletes an account from the accounts table based on the id field. """
 
-        cls.__cursor.execute("""DELETE FROM accounts WHERE id =: id; """,
+        cls.__cursor.execute("""DELETE FROM accounts WHERE id = :id; """,
                              {'id': id})
         cls.__conn.commit()
 
@@ -91,7 +91,7 @@ class Database(object):
         from the accounts table based on the id field. """
 
         cls.__cursor.execute("""SELECT account_type, username, email, password FROM accounts
-                                    WHERE id =: id; """,
+                                    WHERE id = :id; """,
                              {'id': id})
         return cls.__cursor.fetchone()
 
@@ -99,7 +99,7 @@ class Database(object):
     def select_accounts_by_user(cls, user):
         """ Selects accounts from the accounts table based on the user field. """
 
-        cls.__cursor.execute("""SELECT * FROM accounts WHERE user = : user; """,
+        cls.__cursor.execute("""SELECT * FROM accounts WHERE user = :user; """,
                              {'user': user})
         return cls.__cursor.fetchall()
 
@@ -107,7 +107,7 @@ class Database(object):
     def select_account_password_by_id(cls, id):
         """ Selects the password field of an account based on the id field. """
 
-        cls.__cursor.execute(""" SELECT password FROM accounts WHERE id = : id;""",
+        cls.__cursor.execute(""" SELECT password FROM accounts WHERE id = :id;""",
                              {'id': id})
         return cls.__cursor.fetchone()
 
