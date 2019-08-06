@@ -155,14 +155,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="logout_button">
+      <widget class="QPushButton" name="exit_button">
        <property name="font">
         <font>
          <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Logout</string>
+        <string>Exit</string>
        </property>
       </widget>
      </item>

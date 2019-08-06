@@ -1,3 +1,4 @@
+import os
 import sys
 from sqlite3 import IntegrityError
 from PyQt5.QtWidgets import (QWidget, QApplication, QDialog, QPushButton,
@@ -21,6 +22,8 @@ class WelcomePage(QWidget):
     def register_clicked(self):
         self.register_page = RegisterPage()
         self.register_page.show()
+
+# End of WelcomePage class.
 
 
 class LoginPage(QWidget):
@@ -57,6 +60,8 @@ class LoginPage(QWidget):
         popup.setText('Wrong password or username!')
         popup.exec_()
 
+# End of LoginPage class.
+
 
 class RegisterPage(QWidget):
 
@@ -76,7 +81,7 @@ class RegisterPage(QWidget):
 
         try:
             Database.insert_user(username, password)
-            self.show_info_message(success=True)
+            self.show_popup_message(success=True)
             self.close()
         except IntegrityError as e:
             self.show_popup_message(success=False)
@@ -97,6 +102,8 @@ class RegisterPage(QWidget):
                 'This username is taken!\nPlease choose another username!')
         popup.exec_()
 
+# End of RegisterPage class.
+
 
 class AccountsPage(QWidget):
 
@@ -109,18 +116,19 @@ class AccountsPage(QWidget):
 
         # Customize its column's resize mode seperately.
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.Stretch)
         header.setSectionResizeMode(2, QHeaderView.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.Stretch)
+        header.setSectionResizeMode(5, QHeaderView.Stretch)
 
         # Map button clicks to methods.
         self.add_button.clicked.connect(self.add_account_clicked)
         self.delete_button.clicked.connect(self.delete_account_clicked)
         self.modify_button.clicked.connect(self.modify_account_clicked)
         self.user_settings_button.clicked.connect(self.user_settings_clicked)
-        self.logout_button.clicked.connect(self.logout_clicked)
+        self.exit_button.clicked.connect(self.exit_clicked)
 
     def populate_table(self):
         """ Populates the table with the accounts of the logged in user that
@@ -202,8 +210,25 @@ class AccountsPage(QWidget):
         self.user_settings_page = UserSettingsPage(self)
         self.user_settings_page.show()
 
-    def logout_clicked(self):
-        self.close()
+    def exit_clicked(self):
+        """ Shows a confirmation message asking the user if the want to exit.
+        If the user clicks the Yes button the application exits."""
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Confirmation')
+        popup.setIcon(QMessageBox.Warning)
+        popup.setText('Are you sure you want to exit?')
+        popup.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        popup.setDefaultButton(QMessageBox.No)
+        popup.buttonClicked.connect(self.button_clicked)
+        popup.exec_()
+
+    def button_clicked(self, i):
+        """ Specifies which button was clicked when exitting the application.
+        If the user clicked the Yes button the application exits. """
+
+        if i.text() == '&Yes':
+            self.close()
 
     def show_error_message(self):
         """ Shows an error message if the user hasn't selected a row or an account
@@ -214,6 +239,8 @@ class AccountsPage(QWidget):
         popup.setIcon(QMessageBox.Critical)
         popup.setText('Please select a row/account from the table!')
         popup.exec_()
+
+# End of the AccountsPage class.
 
 
 class UserSettingsPage(QWidget):
@@ -240,21 +267,27 @@ class UserSettingsPage(QWidget):
             try:
                 Database.update_user(
                     self.accounts_page.credentials[0], new_username, new_password)
-                Database.update_user_field_in_accounts(
+                Database.update_accounts_user_field(
                     new_username, self.accounts_page.credentials[0])
                 self.accounts_page.credentials[0] = new_username
                 self.accounts_page.set_username_label()
                 self.close()
             except IntegrityError as e:
                 self.show_error_message()
+        else:
+            self.close()
 
     def show_error_message(self):
+        """ Shows an error message if the user chose a taken username. """
+
         popup = QMessageBox()
         popup.setWindowTitle('Error')
         popup.setIcon(QMessageBox.Critical)
         popup.setText(
             'This username is taken!\nPlease choose another username!')
         popup.exec_()
+
+# End of the UserSettingsPage class.
 
 
 class AddAccountPage(QWidget):
@@ -293,6 +326,8 @@ class AddAccountPage(QWidget):
         popup.setIcon(QMessageBox.Critical)
         popup.setText('Please fill all the required fields!')
         popup.exec_()
+
+# End of AddAccountPage class.
 
 
 class ModifyAccountPage(QWidget):
@@ -337,6 +372,8 @@ class ModifyAccountPage(QWidget):
         popup.setText('Please fill all the required fields!')
         popup.exec_()
 
+# End of ModifyAccountPage class.
+
 
 class ShowPasswordPage(QWidget):
 
@@ -350,6 +387,8 @@ class ShowPasswordPage(QWidget):
         self.cancel_button.clicked.connect(self.close)
 
     def show_password(self, account_id, account_type, credentials):
+        """ Sets the password_label with the selected account's password. """
+
         password = self.password_txt.text()
 
         if password == credentials[1]:
@@ -358,8 +397,19 @@ class ShowPasswordPage(QWidget):
             self.password_label.setText(
                 'Your %s password is:\n %s' % (account_type, account_password[0]))
 
+# End of ShowPasswordPage class.
+
 
 def main(argv):
+    if not os.path.isfile('database.db'):
+        # If the database.db doesn't exist create the database
+        # and the tables inside.
+        Database.connect()
+        Database.create_tables()
+    else:
+        # Else just connect to the already existing database.
+        Database.connect()
+
     app = QApplication(argv)
     welcome_page = WelcomePage()
     welcome_page.show()
