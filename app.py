@@ -188,10 +188,21 @@ class AccountsPage(QWidget):
         selected_account = self.table.selectedItems()
         if selected_account:
             selected_account_id = selected_account[0].text()
-            self.table.removeRow(self.table.currentRow())
-            Database.delete_account_by_id(selected_account_id)
+            selected_account_name = selected_account[1].text()
+            self.show_confirmation_message(
+                selected_account_id, selected_account_name)
         else:
             self.show_error_message()
+
+    def delete_confirmation(self, i):
+        """ Specifies which button was clicked when the user wanted to delete
+        an account. (Yes / No) """
+
+        if i.text() == '&Yes':
+            selected_account = self.table.selectedItems()
+            selected_account_id = selected_account[0].text()
+            self.table.removeRow(self.table.currentRow())
+            Database.delete_account_by_id(selected_account_id)
 
     def modify_account_clicked(self):
         """ Shows the ModifyAccountPage for the user to edit their account information. """
@@ -220,15 +231,28 @@ class AccountsPage(QWidget):
         popup.setText('Are you sure you want to exit?')
         popup.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         popup.setDefaultButton(QMessageBox.No)
-        popup.buttonClicked.connect(self.button_clicked)
+        popup.buttonClicked.connect(self.exit_confirmation)
         popup.exec_()
 
-    def button_clicked(self, i):
+    def exit_confirmation(self, i):
         """ Specifies which button was clicked when exitting the application.
         If the user clicked the Yes button the application exits. """
 
         if i.text() == '&Yes':
             self.close()
+
+    def show_confirmation_message(self, selected_account_id, selected_account_name):
+        """ Shows a confirmation message when the users clicks the delete button. """
+
+        popup = QMessageBox()
+        popup.setWindowTitle('Confirmation')
+        popup.setIcon(QMessageBox.Warning)
+        popup.setText('Are you sure you want to delete your Account %s: %s?' %
+                      (selected_account_id, selected_account_name))
+        popup.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        popup.setDefaultButton(QMessageBox.No)
+        popup.buttonClicked.connect(self.delete_confirmation)
+        popup.exec_()
 
     def show_error_message(self):
         """ Shows an error message if the user hasn't selected a row or an account
